@@ -1,102 +1,68 @@
-import java.util.Scanner;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
 import java.util.*;
-
-// Node structure for tree
-class Node {
-
-    long data;
-    List<Node> children;
-
-    Node(long x) {
-
-        data = x;
-        children = new ArrayList<>();
-    }
-
-    Node get(long p) {
-
-        if (p == data)
-            return this;
-
-        for (Node node : children)
-            return node.get(p);
-
-        return null;
-    }
-}
 
 public class Subordinates {
 
-    static List<Integer>[] tree;
-    static int[] subordinates;
+    public static void main(String[] args) throws Exception {
 
-    // Function to add a child to a node
-    static void addChild(Node parent, Node child) {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        if (parent == null)
-            return;
+        int n = Integer.parseInt(br.readLine());
 
-        parent.children.add(child);
-    }
+        int[] parent = new int[n + 1];
+        int[] childCount = new int[n + 1];
+        int[] sub = new int[n + 1];
 
-    static void dfs(int node) {
+        StringTokenizer st = new StringTokenizer(br.readLine());
 
-        subordinates[node] = 0;
-
-        for (int child : tree[node]) {
-
-            dfs(child);
-
-            subordinates[node] += 1 + subordinates[child];
-        }
-    }
-
-    // Function to print parents of each node
-    static void printParents(Node node, Node parent) {
-
-        if (parent == null)
-            System.out.println(node.data + " -> NULL");
-        else
-            System.out.println(node.data + " -> " + parent.data);
-
-        for (Node child : node.children)
-            printParents(child, node);
-    }
-
-    public static void main(String[] args) {
-
-        Scanner sc = new Scanner(System.in);
-
-        int n = sc.nextInt();
-
-        tree = new ArrayList[n + 1];
-        subordinates = new int[n + 1];
-
-        for (int i = 1; i <= n; i++)
-            tree[i] = new ArrayList<>();
-
-        Node root = new Node(1);
-
+        // Leer padres
         for (int i = 2; i <= n; i++) {
 
-            Node node = new Node(i);
+            parent[i] = Integer.parseInt(st.nextToken());
 
-            int boss = sc.nextInt();
-
-            addChild(root.get(boss), node);
-
-            tree[boss].add(i);
+            childCount[parent[i]]++;
         }
 
-        System.out.println("Parents of each node:");
+        // Cola para nodos listos (hojas)
+        Deque<Integer> queue = new ArrayDeque<>();
 
-        printParents(root, null);
+        // Inicializar con hojas
+        for (int i = 1; i <= n; i++) {
 
-        dfs(1);
+            if (childCount[i] == 0) {
 
-        for (int i = 1; i <= n; i++)
-            System.out.print(subordinates[i] + " ");
+                queue.add(i);
+            }
+        }
+
+        // Procesamiento tipo topológico
+        while (!queue.isEmpty()) {
+
+            int u = queue.poll();
+
+            int p = parent[u];
+
+            if (p != 0) {
+
+                sub[p] += 1 + sub[u];
+
+                childCount[p]--;
+
+                if (childCount[p] == 0) {
+
+                    queue.add(p);
+                }
+            }
+        }
+
+        // Output
+        StringBuilder out = new StringBuilder();
+
+        for (int i = 1; i <= n; i++) {
+
+            out.append(sub[i]).append(" ");
+        }
+
+        System.out.println(out);
     }
 }
